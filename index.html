@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>MapLibre GL JS with GitHub Tiles</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+    <script src='https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js'></script>
+    <link href='https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css' rel='stylesheet' />
+    <style>
+        body { margin: 0; padding: 0; }
+        #map { position: absolute; top: 0; bottom: 0; width: 100%; height: 100%; }
+    </style>
+</head>
+<body>
+    <div id='map'></div>
+    <script>
+        const map = new maplibregl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/streets-v11', // Default style
+            zoom: 9,
+            center: [0, 0]
+        });
+
+        // Add GitHub tiles as a custom source
+        map.addSource('github-tiles', {
+            'type': 'raster',
+            'tiles': ['https://raw.githubusercontent.com/USERNAME/REPO/BRANCH/tiles/{z}/{x}/{y}.png']
+        });
+
+        // Add a raster layer using the custom source
+        map.addLayer({
+            'id': 'github-tiles-layer',
+            'type': 'raster',
+            'source': 'github-tiles',
+            'paint': {
+                'raster-opacity': 1
+            }
+        });
+    </script>
+</body>
+</html>
