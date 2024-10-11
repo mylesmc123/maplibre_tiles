@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8" />
-    <title>MapLibre GL JS with GitHub Tiles</title>
+    <title>MapLibre GL JS with 3D Terrain</title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
     <script src='https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js'></script>
     <link href='https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css' rel='stylesheet' />
@@ -16,25 +16,70 @@
     <script>
         const map = new maplibregl.Map({
             container: 'map',
-            style: 'mapbox://styles/mapbox/streets-v11', // Default style
-            zoom: 9,
-            center: [0, 0]
+            style: {
+                "version": 8,
+                "sources": {
+                    "osm-tiles": {
+                        "type": "raster",
+                        "tiles": [
+                            "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                            "https://b.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                            "https://c.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                        ],
+                        "tileSize": 256
+                    },
+                    "terrain": {
+                        "type": "raster-dem",
+                        "url": "https://api.maptiler.com/tiles/terrain-rgb/tiles.json?key=G28Wx0TEh00gRJifwBmD", // Replace with your MapTiler API key
+                        "tileSize": 256,
+                    }
+                },
+                "layers": [{
+                    "id": "osm-tiles",
+                    "type": "raster",
+                    "source": "osm-tiles"
+                }]
+            },
+            zoom: 5, // Adjust zoom level for better view of Texas
+            center: [-99.9018, 31.9686], // Coordinates for Texas,
+            pitch: 45, // Tilt the map for a 3D effect
+            bearing: -17.6 // Adjust bearing for better view
         });
 
-        // Add GitHub tiles as a custom source
-        map.addSource('github-tiles', {
-            'type': 'raster',
-            'tiles': ['https://raw.githubusercontent.com/USERNAME/REPO/BRANCH/tiles/{z}/{x}/{y}.png']
-        });
+        map.on('load', function () {
+            // Enable 3D terrain
+            map.setTerrain({ source: 'terrain' });
 
-        // Add a raster layer using the custom source
-        map.addLayer({
-            'id': 'github-tiles-layer',
-            'type': 'raster',
-            'source': 'github-tiles',
-            'paint': {
-                'raster-opacity': 1
-            }
+            // Add hillshade layer
+            map.addLayer({
+                'id': 'hillshade',
+                'type': 'hillshade',
+                'source': 'terrain',
+                'paint': {
+                    'hillshade-exaggeration': 5, // Increase exaggeration for better effect
+                    'hillshade-shadow-color': '#000000',
+                    'hillshade-highlight-color': '#FFFFFF',
+                    'hillshade-accent-color': '#AAAAAA'
+                }
+            });
+
+            // Add GitHub tiles as a custom source
+            map.addSource('github-tiles', {
+                'type': 'raster',
+                'tiles': ['https://raw.githubusercontent.com/mylesmc123/maplibre_tiles/refs/heads/main/gis/tiles/{z}/{x}/{y}.png'],
+                // https://raw.githubusercontent.com/mylesmc123/maplibre_tiles/refs/heads/main/gis/tiles/10/241/424.png
+                'tileSize': 256
+            });
+
+            map.addLayer({
+                'id': 'github-tiles-layer',
+                'type': 'raster',
+                'source': 'github-tiles',
+                'paint': {
+                    'raster-opacity': 1
+                }
+            });
+            
         });
     </script>
 </body>
